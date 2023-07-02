@@ -146,8 +146,14 @@ module.exports = {
                     if (collectedInteraction && collectedInteraction.values) {
                         const selectedOption = collectedInteraction.values[0];
                         try {
+                            let embed2 = new Discord.EmbedBuilder() 
+                            .setColor(0x0099FF)
+                            .setTitle('Usuário aprovado!')
+                            .setDescription(`O cargo foi adicionado com sucesso para ${member.user}!`)
+                            .setThumbnail(embed.thumbnail.url)
+                            .setFooter({ text: `Aprovado por: ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) });
                             await member.roles.add(selectedOption);
-                            await collectedInteraction.update({ content: "Aprovado! O cargo foi adicionado com sucesso!", components: [] });
+                            await collectedInteraction.update({ components: [],  embeds: [embed2] });
                         } catch (error) {
                             console.error("Erro ao adicionar o cargo:", error);
                             await collectedInteraction.update({ content: "Ocorreu um erro ao adicionar o cargo.", components: [] });
@@ -167,7 +173,7 @@ module.exports = {
                     if (!resposta4) resposta4 = "Não informado."
 
                     let embed = new Discord.EmbedBuilder()
-                        .setColor("Green")
+                        .setColor(0x0083b3)
                         .setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
                         .setThumbnail(interaction.user.displayAvatarURL({ dynamic: true }))
                         .setDescription(`O usuário ${interaction.user} enviou o formulário abaixo:`)
