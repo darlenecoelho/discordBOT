@@ -21,8 +21,6 @@ module.exports = {
     ],
 
     run: async(client, interaction) => {
-
-
         if (!interaction.member.permissions.has(Discord.PermissionFlagsBits.Administrator)) {
             interaction.reply({ content: `Você não possui permissão para utilizar este comando.`, ephemeral: true })
         } else {
@@ -36,19 +34,17 @@ module.exports = {
             } else {
                 await db.set(`canal_formulario_${interaction.guild.id}`, canal_formulario.id)
                 await db.set(`canal_logs_${interaction.guild.id}`, canal_logs.id)
-
                 let embed = new Discord.EmbedBuilder()
                     .setDescription("Random")
                     .setTitle("Canais Configurados!")
                     .setDescription(`> Canal do Formulário: ${canal_formulario}.\n> Canal de Logs: ${canal_logs}.`)
-
                 interaction.reply({ embeds: [embed], ephemeral: true }).then(() => {
                     let embed_formulario = new Discord.EmbedBuilder()
                         .setColor(0x0083b3)
                         .setAuthor({ name: interaction.guild.name, iconURL: interaction.guild.iconURL({ dynamic: true }) })
                         .setThumbnail(interaction.guild.iconURL({ dynamic: true }))
                         .setTitle(`Formulário:`)
-                        .setDescription(`Preencha o formulário para solicitar seu set`);
+                        .setDescription(`Preencha o formulário para solicitar seu set.`);
 
                     let botao = new Discord.ActionRowBuilder().addComponents(
                         new Discord.ButtonBuilder()
@@ -76,7 +72,7 @@ module.exports = {
                         .setLabel("Nome completo e passaporte")
                         .setMaxLength(30)
                         .setMinLength(5)
-                        .setPlaceholder("Ex: Fuath Brown 30")
+                        .setPlaceholder("Ex: Clarins Brown 7")
                         .setRequired(true)
                         .setStyle(Discord.TextInputStyle.Short);
 
@@ -103,7 +99,7 @@ module.exports = {
                         .setLabel("Quem recrutou?")
                         .setMaxLength(30)
                         .setMinLength(4)
-                        .setPlaceholder("Ex: Fuath Brown")
+                        .setPlaceholder("Ex: Shanks Brown")
                         .setStyle(Discord.TextInputStyle.Short)
                         .setRequired(true);
 
@@ -115,8 +111,8 @@ module.exports = {
                     )
                     await interaction.showModal(modal)
                 } else if (interaction.customId === "aprovar") {
-                    const roleToAdd = "1123710114608713768"; // ID do cargo que será adicionado
-                    const roleToAdd2 = "1124827425717633107"; // ID do cargo que será adicionado
+                    const roleToAdd = "1123444320708603924"; // ID do cargo que será adicionado
+                    const roleToAdd2 = "1124832910906753155"; // ID do cargo que será adicionado
 
                     const embed = interaction.message.embeds[0];
                     const userId = embed.thumbnail.url.split("/")[4];
@@ -153,6 +149,7 @@ module.exports = {
                             .setThumbnail(embed.thumbnail.url)
                             .setFooter({ text: `Aprovado por: ${interaction.user.username}`, iconURL: interaction.user.displayAvatarURL({ dynamic: true }) });
                             await member.roles.add(selectedOption);
+                            await member.roles.remove('1124462803835703397'); // id que deseja remover ao aprovar o formulário
                             await collectedInteraction.update({ components: [],  embeds: [embed2] });
                         } catch (error) {
                             console.error("Erro ao adicionar o cargo:", error);
@@ -204,8 +201,20 @@ module.exports = {
                     if (!interaction.replied) {
                         interaction.reply({ content: `Olá **${interaction.user.username}**, seu formulário foi enviado com sucesso!`, ephemeral: true });
                     }
-                    const member = await interaction.guild.members.fetch(interaction.user.id);
-                    await member.setNickname(resposta1); // Definindo o apelido do membro
+                    try {
+                        const member = await interaction.guild.members.fetch(interaction.user.id);
+                        await member.setNickname(resposta1); // Definindo o apelido do membro
+                      } catch (error) {
+                        if (error.code === 50013) {
+                          // Tratamento para o erro "Missing Permissions"
+                          console.error('O bot não tem permissões suficientes para editar o membro.');
+                          // Você pode enviar uma mensagem ou realizar outra ação de tratamento adequada aqui
+                        } else {
+                          // Tratamento para outros erros
+                          console.error('Ocorreu um erro durante a edição do membro:', error);
+                          // Você pode enviar uma mensagem ou realizar outra ação de tratamento adequada aqui
+                        }
+                      }
                     await interaction.guild.channels.cache.get(await db.get(`canal_logs_${interaction.guild.id}`)).send({ embeds: [embed], components: [botao] });
                 }
             }
